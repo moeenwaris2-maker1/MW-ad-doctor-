@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MW Ad Doctor | AI Ad Audit & Copy Surgery</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            mw: {
+              bg: '#0A0A0A',
+              card: '#121212',
+              elevated: '#18181B',
+              border: '#262626',
+              gold: '#D4AF37',
+              goldLight: '#F3E5AB',
+              goldDark: '#AA821C',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0A0A0A;
+      color: #FFFFFF;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0A0A0A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2A2A2A;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #D4AF37;
+    }
+    /* Luxury Gold Gradient & Glow */
+    .gold-gradient {
+      background: linear-gradient(135deg, #D4AF37 0%, #F3D06B 50%, #B88E1E 100%);
+    }
+    .gold-gradient:hover {
+      background: linear-gradient(135deg, #E2BE46 0%, #FBE082 50%, #C69B25 100%);
+    }
+    .gold-glow {
+      box-shadow: 0 0 28px rgba(212, 175, 55, 0.22);
+    }
+    .gold-border-subtle {
+      border: 1px solid rgba(212, 175, 55, 0.25);
+    }
+    /* Scanner Sweep Animation */
+    @keyframes scanLine {
+      0% { top: 0%; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+    .scanner-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #D4AF37, #FFF3B8, #D4AF37, transparent);
+      box-shadow: 0 0 18px 3px rgba(212, 175, 55, 0.7);
+      animation: scanLine 2s ease-in-out infinite;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.05); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.7; }
+    }
+    .pulse-ring {
+      animation: pulseRing 2.5s infinite ease-in-out;
+    }
+    .score-ring-transition {
+      transition: stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.6s ease;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#0A0A0A] text-white selection:bg-[#D4AF37] selection:text-black">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-[#222222]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Emblem & Logo -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative w-11 h-11 rounded-xl bg-gradient-to-br from-[#1B1B1B] to-[#0E0E0E] border border-[#D4AF37]/40 flex items-center justify-center shadow-lg gold-glow">
+          <!-- Custom SVG Medical Cross + Pulse Line -->
+          <svg class="w-6 h-6 text-[#D4AF37]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3z" stroke-opacity="0.35" fill="rgba(212,175,55,0.08)"/>
+            <polyline points="4 12 8 12 10 8 13 16 15 11 20 12" stroke="#D4AF37" stroke-width="2.2"/>
+          </svg>
+          <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#D4AF37] animate-ping"></span>
+          <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display font-extrabold text-lg sm:text-xl tracking-tight text-white">MW AD <span class="text-[#D4AF37]">DOCTOR</span></span>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30">v2.5 PRO</span>
+          </div>
+          <p class="text-[11px] tracking-[0.2em] uppercase text-neutral-400 font-medium">By MW Agency • Clinical Ad Diagnostics</p>
+        </div>
+      </div>
+
+      <!-- Top Action Controls -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Engine Mode Status Pill -->
+        <button onclick="openSettingsModal()" id="engineStatusBtn" class="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141414] hover:bg-[#1C1C1C] border border-[#262626] text-xs font-medium text-neutral-300 transition">
+          <span id="engineDot" class="w-2 h-2 rounded-full bg-[#D4AF37]"></span>
+          <span id="engineStatusLabel">Instant Diagnostic Engine</span>
+        </button>
+
+        <!-- Load Sample Ad -->
+        <button onclick="loadSampleAd()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#151515] hover:bg-[#1F1F1F] border border-[#2A2A2A] hover:border-[#D4AF37]/50 text-xs sm:text-sm font-medium text-neutral-200 transition">
+          <i data-lucide="sparkles" class="w-4 h-4 text-[#D4AF37]"></i>
+          <span>Load Sample</span>
+        </button>
+
+        <!-- Export Report -->
+        <button onclick="exportAuditReport()" id="exportBtn" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#151515] hover:bg-[#1F1F1F] border border-[#2A2A2A] hover:border-[#D4AF37]/50 text-xs sm:text-sm font-medium text-neutral-200 transition">
+          <i data-lucide="download" class="w-4 h-4 text-[#D4AF37]"></i>
+          <span class="hidden sm:inline">Export Report</span>
+        </button>
+
+        <!-- AI Engine Settings -->
+        <button onclick="openSettingsModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1A1710] hover:bg-[#241F14] border border-[#D4AF37]/40 text-xs sm:text-sm font-semibold text-[#D4AF37] transition" title="Configure Gemini API Key">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">AI Engine</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+      <!-- LEFT PANEL: AD DIAGNOSTIC INPUT STUDIO (5 Cols on LG) -->
+      <section class="lg:col-span-5 bg-[#121212] border border-[#242424] rounded-2xl p-5 sm:p-6 shadow-2xl">
+        <div class="flex items-center justify-between pb-4 mb-5 border-b border-[#222222]">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37]">
+              <i data-lucide="stethoscope" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h2 class="font-display font-bold text-base sm:text-lg text-white">Ad Diagnostic Studio</h2>
+              <p class="text-xs text-neutral-400">Input underperforming ad assets for surgery</p>
+            </div>
+          </div>
+          <button onclick="clearForm()" class="text-xs text-neutral-400 hover:text-white underline underline-offset-4 transition">Reset</button>
+        </div>
+
+        <!-- 1. Platform Selector Tabs -->
+        <div class="mb-5">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">1. Select Ad Platform</label>
+          <div class="grid grid-cols-3 gap-2 p-1 bg-[#0A0A0A] rounded-xl border border-[#222222]">
+            <button type="button" onclick="setPlatform('meta')" id="tab-meta" class="platform-tab flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-semibold transition bg-[#D4AF37] text-black shadow">
+              <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+              <span>Meta Ads</span>
+            </button>
+            <button type="button" onclick="setPlatform('tiktok')" id="tab-tiktok" class="platform-tab flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-semibold transition text-neutral-400 hover:text-white">
+              <i data-lucide="clapperboard" class="w-3.5 h-3.5"></i>
+              <span>TikTok Ads</span>
+            </button>
+            <button type="button" onclick="setPlatform('google')" id="tab-google" class="platform-tab flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-semibold transition text-neutral-400 hover:text-white">
+              <i data-lucide="search" class="w-3.5 h-3.5"></i>
+              <span>Google Ads</span>
+            </button>
+          </div>
+          <p id="platformHint" class="mt-2 text-[11px] text-[#D4AF37]/90 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i>
+            <span>Meta Check: First 125 chars above "See More" & 40-char punchy headline critical.</span>
+          </p>
+        </div>
+
+        <!-- 2. Campaign Objective & CTA Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-5">
+          <div>
+            <label for="objectiveInput" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Campaign Objective</label>
+            <select id="objectiveInput" class="w-full bg-[#0A0A0A] border border-[#262626] focus:border-[#D4AF37] rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white outline-none transition">
+              <option value="Conversions / Sales">Conversions / Sales</option>
+              <option value="Lead Generation">Lead Generation</option>
+              <option value="Traffic / Awareness">Traffic / Awareness</option>
+              <option value="App Installs">App Installs</option>
+            </select>
+          </div>
+          <div>
+            <label for="ctaInput" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Call-To-Action (CTA)</label>
+            <select id="ctaInput" class="w-full bg-[#0A0A0A] border border-[#262626] focus:border-[#D4AF37] rounded-xl px-3 py-2.5 text-xs sm:text-sm text-white outline-none transition">
+              <option value="Shop Now">Shop Now</option>
+              <option value="Learn More">Learn More</option>
+              <option value="Get Offer">Get Offer</option>
+              <option value="Sign Up">Sign Up</option>
+              <option value="Book Now">Book Now</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 3. Target Audience & Offer -->
+        <div class="mb-5">
+          <label for="audienceInput" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Target Audience & Core Offer</label>
+          <input type="text" id="audienceInput" placeholder="e.g., Skincare buyers in Pakistan/UAE, 25% OFF + Free COD" class="w-full bg-[#0A0A0A] border border-[#262626] focus:border-[#D4AF37] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-600 outline-none transition" />
+        </div>
+
+        <!-- 4. Ad Creative Image Uploader -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Ad Creative Visual (Optional)</label>
+            <span class="text-[11px] text-neutral-500">PNG, JPG, WEBP</span>
+          </div>
+
+          <div id="dropZone" onclick="document.getElementById('creativeFileInput').click()" class="relative group cursor-pointer border-2 border-dashed border-[#2A2A2A] hover:border-[#D4AF37]/70 bg-[#0A0A0A] rounded-xl p-4 text-center transition">
+            <input type="file" id="creativeFileInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
+
+            <!-- Default Empty Upload Prompt -->
+            <div id="uploadPlaceholder" class="flex flex-col items-center justify-center py-2">
+              <div class="w-10 h-10 rounded-full bg-[#161616] group-hover:bg-[#D4AF37]/15 border border-[#2A2A2A] group-hover:border-[#D4AF37]/40 flex items-center justify-center mb-2 transition">
+                <i data-lucide="image-plus" class="w-5 h-5 text-neutral-400 group-hover:text-[#D4AF37]"></i>
+              </div>
+              <p class="text-xs font-medium text-neutral-300">Drop ad creative image or <span class="text-[#D4AF37] underline">browse</span></p>
+              <p class="text-[11px] text-neutral-500 mt-0.5">AI evaluates scroll-stop contrast & copy-visual match</p>
+            </div>
+
+            <!-- Image Preview State -->
+            <div id="imagePreviewWrapper" class="hidden relative">
+              <img id="creativePreviewImg" src="" alt="Ad Creative Preview" class="w-full max-h-44 object-contain rounded-lg border border-[#2A2A2A] bg-black" />
+              <div class="mt-2 flex items-center justify-between text-left bg-[#141414] px-3 py-1.5 rounded-lg border border-[#262626]">
+                <span id="imageFileName" class="text-[11px] text-neutral-300 truncate max-w-[190px]">creative.jpg</span>
+                <button type="button" onclick="removeImage(event)" class="text-[11px] font-semibold text-red-400 hover:text-red-300 flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Hook / Headline -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="headlineInput" class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Ad Headline / Hook <span class="text-[#D4AF37]">*</span></label>
+            <span id="headlineCounter" class="text-[11px] font-mono text-neutral-400">0 / 40 optimal</span>
+          </div>
+          <input type="text" id="headlineInput" oninput="updateCounters()" placeholder="e.g., Best Serum For Glowing Skin Now Available" class="w-full bg-[#0A0A0A] border border-[#262626] focus:border-[#D4AF37] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-neutral-600 outline-none transition" />
+        </div>
+
+        <!-- 6. Primary Ad Copy / Video Script -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="primaryCopyInput" class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Primary Ad Copy / Script <span class="text-[#D4AF37]">*</span></label>
+            <span id="copyCounter" class="text-[11px] font-mono text-neutral-400">0 chars • 0 words</span>
+          </div>
+          <textarea id="primaryCopyInput" rows="4" oninput="updateCounters()" placeholder="Paste your current Facebook/Instagram primary text, TikTok hook script, or Google ad description here..." class="w-full bg-[#0A0A0A] border border-[#262626] focus:border-[#D4AF37] rounded-xl px-3.5 py-3 text-xs sm:text-sm text-white placeholder-neutral-600 outline-none transition resize-y"></textarea>
+        </div>
+
+        <!-- Primary Action Button -->
+        <button type="button" id="runSurgeryBtn" onclick="runAdSurgery()" class="w-full gold-gradient text-black font-display font-extrabold text-sm sm:text-base tracking-wide py-3.5 px-6 rounded-xl shadow-lg gold-glow flex items-center justify-center gap-2.5 transition transform active:scale-[0.99] cursor-pointer">
+          <i data-lucide="activity" class="w-5 h-5 stroke-[2.5]"></i>
+          <span>RUN AD SURGERY</span>
+        </button>
+      </section>
+
+      <!-- RIGHT PANEL: CLINICAL AD DIAGNOSIS & PRESCRIPTION OUTPUT (7 Cols on LG) -->
+      <section class="lg:col-span-7 relative min-h-[580px]">
+
+        <!-- Animated Scanning Overlay (Hidden by default) -->
+        <div id="scanningOverlay" class="hidden absolute inset-0 z-30 bg-[#0D0D0D]/95 backdrop-blur-md border border-[#D4AF37]/40 rounded-2xl flex flex-col items-center justify-center p-8 text-center overflow-hidden">
+          <div class="scanner-line"></div>
+          <div class="relative w-20 h-20 rounded-2xl bg-[#16140E] border border-[#D4AF37]/50 flex items-center justify-center mb-5 pulse-ring">
+            <i data-lucide="scan-line" class="w-10 h-10 text-[#D4AF37]"></i>
+          </div>
+          <h3 class="font-display font-extrabold text-xl sm:text-2xl text-white mb-2">Scanning Ad DNA...</h3>
+          <p id="scanStepText" class="text-xs sm:text-sm text-[#D4AF37] font-medium mb-6">Evaluating 3-second thumb-stop hook velocity...</p>
+          <div class="w-full max-w-xs bg-[#1C1C1C] h-2 rounded-full overflow-hidden border border-[#2A2A2A]">
+            <div id="scanProgressBar" class="h-full gold-gradient w-1/4 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- STATE A: Empty / Ready State Preview -->
+        <div id="emptyResultState" class="bg-[#121212] border border-[#242424] rounded-2xl p-6 sm:p-10 h-full flex flex-col items-center justify-center text-center">
+          <div class="w-16 h-16 rounded-2xl bg-[#181611] border border-[#D4AF37]/30 flex items-center justify-center mb-5 shadow-inner">
+            <i data-lucide="heart-pulse" class="w-8 h-8 text-[#D4AF37]"></i>
+          </div>
+          <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest bg-[#1A1A1A] text-[#D4AF37] border border-[#2B2B2B] mb-3">Awaiting Patient Ad</span>
+          <h3 class="font-display font-extrabold text-xl sm:text-2xl text-white max-w-md mb-2.5">Stop Burning Budget on Weak Hooks & Generic Copy</h3>
+          <p class="text-xs sm:text-sm text-neutral-400 max-w-lg mb-8 leading-relaxed">
+            Enter your ad headline, primary text, or upload your creative on the left. <strong class="text-white">MW Ad Doctor</strong> will diagnose conversion leaks and prescribe 3 battle-tested direct-response rewrites.
+          </p>
+
+          <!-- Preview Diagnostic Pillars -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full max-w-xl text-left">
+            <div class="bg-[#0A0A0A] border border-[#222222] rounded-xl p-4">
+              <div class="w-7 h-7 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] mb-2.5">
+                <i data-lucide="gauge" class="w-4 h-4"></i>
+              </div>
+              <h4 class="font-display font-bold text-xs text-white mb-1">0–100 Health Score</h4>
+              <p class="text-[11px] text-neutral-400">Instant scoring across Hook, Offer, Platform Fit & CTA.</p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-[#222222] rounded-xl p-4">
+              <div class="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 mb-2.5">
+                <i data-lucide="microscope" class="w-4 h-4"></i>
+              </div>
+              <h4 class="font-display font-bold text-xs text-white mb-1">Bleed Diagnosis</h4>
+              <p class="text-[11px] text-neutral-400">Pinpoints exact friction killing your CTR and ROAS.</p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-[#222222] rounded-xl p-4">
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2.5">
+                <i data-lucide="file-check-2" class="w-4 h-4"></i>
+              </div>
+              <h4 class="font-display font-bold text-xs text-white mb-1">3 MW Prescriptions</h4>
+              <p class="text-[11px] text-neutral-400">Ready-to-launch PAS, Curiosity & Urgency variants.</p>
+            </div>
+          </div>
+
+          <button onclick="loadSampleAd(true)" class="mt-8 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1A1A1A] hover:bg-[#222222] border border-[#D4AF37]/40 text-xs font-semibold text-[#D4AF37] transition">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+            <span>Try Live Demo With Underperforming E-Commerce Ad</span>
+          </button>
+        </div>
+
+        <!-- STATE B: Complete Diagnostic Output (Hidden until surgery runs) -->
+        <div id="diagnosticResultsState" class="hidden space-y-6">
+
+          <!-- 1. Health Score & 4 Sub-Metrics Card -->
+          <div class="bg-[#121212] border border-[#262626] rounded-2xl p-5 sm:p-6 shadow-xl">
+            <div class="flex flex-col sm:flex-row items-center gap-6">
+              <!-- Radial SVG Score Ring -->
+              <div class="relative w-32 h-32 shrink-0 flex items-center justify-center">
+                <svg class="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#1F1F1F" stroke-width="10" />
+                  <circle id="scoreRingCircle" cx="60" cy="60" r="50" fill="none" stroke="#D4AF37" stroke-width="10" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="314.16" class="score-ring-transition" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span id="overallScoreNumber" class="font-display font-extrabold text-3xl text-white">0</span>
+                  <span class="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">/ 100</span>
+                </div>
+              </div>
+
+              <!-- Verdict Summary & Sub-Score Bars -->
+              <div class="flex-1 w-full">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span id="verdictBadge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">NEEDS SURGERY</span>
+                  <span id="auditSourceBadge" class="text-[11px] text-neutral-400 flex items-center gap-1">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5 text-[#D4AF37]"></i>
+                    <span>MW Diagnostic Engine</span>
+                  </span>
+                </div>
+                <h3 id="verdictHeadline" class="font-display font-bold text-base sm:text-lg text-white mb-4">Your ad has high scroll-past risk due to a passive opening hook.</h3>
+
+                <!-- 4 Sub-Score Bars -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-neutral-300 font-medium">Scroll-Stop Hook</span>
+                      <span id="subHookScore" class="font-mono font-bold text-[#D4AF37]">0/100</span>
+                    </div>
+                    <div class="h-1.5 bg-[#0A0A0A] rounded-full overflow-hidden">
+                      <div id="subHookBar" class="h-full bg-[#D4AF37] rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-neutral-300 font-medium">Persuasion & Offer</span>
+                      <span id="subOfferScore" class="font-mono font-bold text-[#D4AF37]">0/100</span>
+                    </div>
+                    <div class="h-1.5 bg-[#0A0A0A] rounded-full overflow-hidden">
+                      <div id="subOfferBar" class="h-full bg-[#D4AF37] rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-neutral-300 font-medium">Platform Fit</span>
+                      <span id="subPlatformScore" class="font-mono font-bold text-[#D4AF37]">0/100</span>
+                    </div>
+                    <div class="h-1.5 bg-[#0A0A0A] rounded-full overflow-hidden">
+                      <div id="subPlatformBar" class="h-full bg-[#D4AF37] rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-neutral-300 font-medium">CTA Clarity</span>
+                      <span id="subCtaScore" class="font-mono font-bold text-[#D4AF37]">0/100</span>
+                    </div>
+                    <div class="h-1.5 bg-[#0A0A0A] rounded-full overflow-hidden">
+                      <div id="subCtaBar" class="h-full bg-[#D4AF37] rounded-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Clinical Diagnosis (What's Broken & Why) -->
+          <div class="bg-[#121212] border border-[#262626] rounded-2xl p-5 sm:p-6">
+            <div class="flex items-center gap-2.5 mb-4">
+              <div class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-bold text-base text-white">Clinical Diagnosis (Conversion Leaks)</h3>
+                <p class="text-xs text-neutral-400">Specific bottlenecks hurting click-through & ROAS</p>
+              </div>
+            </div>
+            <ul id="diagnosisList" class="space-y-2.5">
+              <!-- Populated dynamically -->
+            </ul>
+          </div>
+
+          <!-- 3. The Prescription: 3 High-Converting MW Rewrites -->
+          <div class="bg-[#121212] border border-[#D4AF37]/30 rounded-2xl p-5 sm:p-6 shadow-xl">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-[#D4AF37]/15 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-display font-bold text-base text-white">The Prescription (3 High-Converting Rewrites)</h3>
+                  <p class="text-xs text-neutral-400">Engineered by MW Direct-Response Frameworks</p>
+                </div>
+              </div>
+              <span class="text-[11px] font-semibold text-[#D4AF37] bg-[#D4AF37]/10 px-2.5 py-1 rounded-full border border-[#D4AF37]/25">Ready to Launch</span>
+            </div>
+
+            <!-- Angle Selector Tabs -->
+            <div class="grid grid-cols-3 gap-2 p-1 bg-[#0A0A0A] rounded-xl border border-[#222222] mb-5">
+              <button type="button" onclick="selectPrescriptionTab(0)" id="rx-tab-0" class="rx-tab py-2 px-2 rounded-lg text-xs font-bold transition bg-[#D4AF37] text-black">
+                1. Pain-Agitation-Solve
+              </button>
+              <button type="button" onclick="selectPrescriptionTab(1)" id="rx-tab-1" class="rx-tab py-2 px-2 rounded-lg text-xs font-bold transition text-neutral-400 hover:text-white">
+                2. Pattern Interrupt
+              </button>
+              <button type="button" onclick="selectPrescriptionTab(2)" id="rx-tab-2" class="rx-tab py-2 px-2 rounded-lg text-xs font-bold transition text-neutral-400 hover:text-white">
+                3. Proof & Scarcity
+              </button>
+            </div>
+
+            <!-- Active Rewrite Card Container -->
+            <div id="prescriptionCardContainer" class="bg-[#0A0A0A] border border-[#262626] rounded-xl p-4 sm:p-5">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- 4. Creative & A/B Testing Checklist -->
+          <div class="bg-[#121212] border border-[#262626] rounded-2xl p-5 sm:p-6">
+            <div class="flex items-center gap-2.5 mb-4">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <i data-lucide="flask-conical" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="font-display font-bold text-base text-white">Visual Creative & A/B Test Protocol</h3>
+                <p class="text-xs text-neutral-400">Next steps to scale winning variants</p>
+              </div>
+            </div>
+            <div id="abChecklistContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[#1D1D1D] py-5 px-4 text-center text-xs text-neutral-500">
+    <p>Built for <span class="text-[#D4AF37] font-semibold">MW Agency</span> • MW Ad Doctor Diagnostic Suite • Zero Budget Waste</p>
+  </footer>
+
+  <!-- AI ENGINE SETTINGS MODAL -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#121212] border border-[#D4AF37]/40 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#242424]">
+        <div class="flex items-center gap-2">
+          <i data-lucide="cpu" class="w-5 h-5 text-[#D4AF37]"></i>
+          <h3 class="font-display font-bold text-lg text-white">AI Engine Settings</h3>
+        </div>
+        <button onclick="closeSettingsModal()" class="text-neutral-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-neutral-300 leading-relaxed mb-4">
+        By default, <strong class="text-white">MW Ad Doctor</strong> runs on our built-in <span class="text-[#D4AF37]">Instant Diagnostic Engine</span> (no API key needed). To unlock live multimodal <strong class="text-white">Google Gemini 2.5 Flash</strong> vision & copy analysis, paste your Gemini API key below:
+      </p>
+
+      <div class="mb-4">
+        <label for="geminiApiKeyInput" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Google Gemini API Key</label>
+        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-[#0A0A0A] border border-[#2A2A2A] focus:border-[#D4AF37] rounded-xl px-3.5 py-2.5 text-sm text-white outline-none" />
+        <p class="text-[11px] text-neutral-500 mt-1.5">Stored locally in your browser (<code class="text-neutral-400">localStorage</code>). Never sent to any third-party server.</p>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button type="button" onclick="clearApiKey()" class="px-3.5 py-2 rounded-xl bg-[#1A1A1A] hover:bg-[#242424] text-xs font-semibold text-neutral-300 transition">Clear Key</button>
+        <button type="button" onclick="saveApiKey()" class="px-4 py-2 rounded-xl gold-gradient text-black text-xs font-extrabold transition">Save & Activate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    // Global App State
+    const state = {
+      platform: 'meta',
+      imageBase64: null,
+      imageMimeType: null,
+      imageName: null,
+      currentReport: null,
+      activePrescriptionIdx: 0
+    };
+
+    const PLATFORM_RULES = {
+      meta: {
+        name: 'Meta Ads (FB/IG)',
+        headlineLimit: 40,
+        hint: 'Meta Check: First 125 chars above "See More" & 40-char punchy headline critical.'
+      },
+      tiktok: {
+        name: 'TikTok Ads',
+        headlineLimit: 35,
+        hint: 'TikTok Check: First 3 seconds must feel native UGC, not a polished corporate commercial.'
+      },
+      google: {
+        name: 'Google Search/Display',
+        headlineLimit: 30,
+        hint: 'Google Check: High-intent keyword match, hard numbers & zero fluff within 30 chars.'
+      }
+    };
+
+    // Initialize Icons & Stored API Key on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updateEngineStatusUI();
+      setupDragAndDrop();
+    });
+
+    // Toast Notification Helper (Replaces alert)
+    function showToast(message, type = 'gold') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const borderColor = type === 'error' ? 'border-red-500/50 text-red-200' : 'border-[#D4AF37]/50 text-white';
+      const iconName = type === 'error' ? 'alert-circle' : 'check-circle-2';
+      const iconColor = type === 'error' ? 'text-red-400' : 'text-[#D4AF37]';
+
+      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-[#141414] border ${borderColor} shadow-2xl text-xs font-medium transform transition-all duration-300 translate-y-2 opacity-0`;
+      toast.innerHTML = `<i data-lucide="${iconName}" class="w-4 h-4 ${iconColor} shrink-0"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+      lucide.createIcons({ nodes: [toast] });
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    // Platform Tab Switcher
+    function setPlatform(platformKey) {
+      state.platform = platformKey;
+      ['meta', 'tiktok', 'google'].forEach(key => {
+        const btn = document.getElementById(`tab-${key}`);
+        if (key === platformKey) {
+          btn.className = 'platform-tab flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-semibold transition bg-[#D4AF37] text-black shadow';
+        } else {
+          btn.className = 'platform-tab flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-semibold transition text-neutral-400 hover:text-white';
+        }
+      });
+      document.getElementById('platformHint').innerHTML = `<i data-lucide="info" class="w-3.5 h-3.5 shrink-0"></i><span>${PLATFORM_RULES[platformKey].hint}</span>`;
+      lucide.createIcons();
+      updateCounters();
+    }
+
+    // Live Character & Word Counters
+    function updateCounters() {
+      const headline = document.getElementById('headlineInput').value;
+      const copy = document.getElementById('primaryCopyInput').value;
+      const limit = PLATFORM_RULES[state.platform].headlineLimit;
+
+      const hCounter = document.getElementById('headlineCounter');
+      hCounter.textContent = `${headline.length} / ${limit} optimal`;
+      hCounter.className = headline.length > limit
+        ? 'text-[11px] font-mono text-amber-400 font-semibold'
+        : 'text-[11px] font-mono text-neutral-400';
+
+      const words = copy.trim() ? copy.trim().split(/\s+/).length : 0;
+      document.getElementById('copyCounter').textContent = `${copy.length} chars • ${words} words`;
+    }
+
+    // Image Upload & Drag-and-Drop Handlers
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+      ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+          e.preventDefault();
+          dropZone.classList.add('border-[#D4AF37]', 'bg-[#15130D]');
+        });
+      });
+      ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+          e.preventDefault();
+          dropZone.classList.remove('border-[#D4AF37]', 'bg-[#15130D]');
+        });
+      });
+      dropZone.addEventListener('drop', e => {
+        const file = e.dataTransfer.files[0];
+        if (file) processImageFile(file);
+      });
+    }
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) processImageFile(file);
+    }
+
+    function processImageFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('Please upload a valid image file (PNG, JPG, WEBP).', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        state.imageBase64 = dataUrl.split(',')[1];
+        state.imageMimeType = file.type;
+        state.imageName = file.name;
+
+        document.getElementById('creativePreviewImg').src = dataUrl;
+        document.getElementById('imageFileName').textContent = file.name;
+        document.getElementById('uploadPlaceholder').classList.add('hidden');
+        document.getElementById('imagePreviewWrapper').classList.remove('hidden');
+        showToast('Ad creative uploaded for visual audit.');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeImage(event) {
+      event.stopPropagation();
+      state.imageBase64 = null;
+      state.imageMimeType = null;
+      state.imageName = null;
+      document.getElementById('creativeFileInput').value = '';
+      document.getElementById('uploadPlaceholder').classList.remove('hidden');
+      document.getElementById('imagePreviewWrapper').classList.add('hidden');
+    }
+
+    // Load Sample Ad for Quick Demo
+    function loadSampleAd(autoRun = false) {
+      setPlatform('meta');
+      document.getElementById('objectiveInput').value = 'Conversions / Sales';
+      document.getElementById('ctaInput').value = 'Learn More';
+      document.getElementById('audienceInput').value = 'Men & Women 25-45 in Pakistan & UAE, Hairfall solution, 20% OFF + Free COD';
+      document.getElementById('headlineInput').value = 'Buy Our Best Organic Hair Growth Oil Today For Healthy Hair';
+      document.getElementById('primaryCopyInput').value = 'We are excited to introduce our new organic rosemary hair oil. It is made with natural ingredients and helps reduce hair fall and make your hair look shiny and strong. Many customers love our product. Visit our website now to order yours.';
+      updateCounters();
+      showToast('Loaded sample e-commerce ad with common conversion leaks.');
+      if (autoRun) {
+        runAdSurgery();
+      }
+    }
+
+    function clearForm() {
+      document.getElementById('audienceInput').value = '';
+      document.getElementById('headlineInput').value = '';
+      document.getElementById('primaryCopyInput').value = '';
+      removeImage(new Event('click'));
+      updateCounters();
+      document.getElementById('diagnosticResultsState').classList.add('hidden');
+      document.getElementById('emptyResultState').classList.remove('hidden');
+      state.currentReport = null;
+      showToast('Diagnostic studio cleared.');
+    }
+
+    // Settings Modal Controls
+    function openSettingsModal() {
+      const savedKey = localStorage.getItem('mw_ad_doctor_gemini_key') || '';
+      document.getElementById('geminiApiKeyInput').value = savedKey;
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function saveApiKey() {
+      const key = document.getElementById('geminiApiKeyInput').value.trim();
+      if (key) {
+        localStorage.setItem('mw_ad_doctor_gemini_key', key);
+        showToast('Gemini 2.5 Flash API Key saved & activated!');
+      } else {
+        localStorage.removeItem('mw_ad_doctor_gemini_key');
+        showToast('Switched to Built-in Instant Diagnostic Engine.');
+      }
+      updateEngineStatusUI();
+      closeSettingsModal();
+    }
+
+    function clearApiKey() {
+      localStorage.removeItem('mw_ad_doctor_gemini_key');
+      document.getElementById('geminiApiKeyInput').value = '';
+      updateEngineStatusUI();
+      showToast('API Key removed. Using Instant Diagnostic Engine.');
+    }
+
+    function updateEngineStatusUI() {
+      const hasKey = Boolean(localStorage.getItem('mw_ad_doctor_gemini_key'));
+      const label = document.getElementById('engineStatusLabel');
+      const dot = document.getElementById('engineDot');
+      if (hasKey) {
+        label.textContent = 'Gemini 2.5 Pro AI Active';
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+      } else {
+        label.textContent = 'Instant Diagnostic Engine';
+        dot.className = 'w-2 h-2 rounded-full bg-[#D4AF37]';
+      }
+    }
+
+    // Main Surgery Orchestrator
+    async function runAdSurgery() {
+      const headline = document.getElementById('headlineInput').value.trim();
+      const primaryCopy = document.getElementById('primaryCopyInput').value.trim();
+      const audience = document.getElementById('audienceInput').value.trim() || 'Targeted online buyers';
+      const objective = document.getElementById('objectiveInput').value;
+      const cta = document.getElementById('ctaInput').value;
+
+      if (!headline && !primaryCopy) {
+        showToast('Please enter a Headline or Primary Ad Copy before running surgery.', 'error');
+        document.getElementById('headlineInput').focus();
+        return;
+      }
+
+      // Show Scanning Animation
+      const overlay = document.getElementById('scanningOverlay');
+      const stepText = document.getElementById('scanStepText');
+      const progressBar = document.getElementById('scanProgressBar');
+      overlay.classList.remove('hidden');
+      progressBar.style.width = '20%';
+      stepText.textContent = 'Extracting hook patterns & emotional triggers...';
+
+      const steps = [
+        { pct: '48%', text: `Auditing ${PLATFORM_RULES[state.platform].name} feed compliance & thumb-stop rate...` },
+        { pct: '76%', text: 'Detecting friction points, weak CTAs & missing urgency...' },
+        { pct: '94%', text: 'Synthesizing 3 high-converting MW Agency rewrites...' }
+      ];
+
+      let stepIdx = 0;
+      const stepTimer = setInterval(() => {
+        if (stepIdx < steps.length) {
+          progressBar.style.width = steps[stepIdx].pct;
+          stepText.textContent = steps[stepIdx].text;
+          stepIdx++;
+        }
+      }, 450);
+
+      const apiKey = localStorage.getItem('mw_ad_doctor_gemini_key');
+      let reportData = null;
+      let engineUsed = 'MW Instant Diagnostic Engine';
+
+      try {
+        if (apiKey) {
+          reportData = await callGeminiAdAudit(apiKey, {
+            platform: PLATFORM_RULES[state.platform].name,
+            objective,
+            cta,
+            audience,
+            headline,
+            primaryCopy,
+            imageBase64: state.imageBase64,
+            imageMimeType: state.imageMimeType
+          });
+          engineUsed = 'Gemini 2.5 Flash Multimodal AI';
+        } else {
+          // Simulate brief clinical compute delay for smooth UX
+          await new Promise(r => setTimeout(r, 1500));
+          reportData = runHeuristicAdAudit({
+            platformKey: state.platform,
+            platformName: PLATFORM_RULES[state.platform].name,
+            objective,
+            cta,
+            audience,
+            headline,
+            primaryCopy,
+            hasImage: Boolean(state.imageBase64)
+          });
+        }
+      } catch (err) {
+        console.warn('Gemini fallback triggered:', err);
+        showToast('Gemini API unreachable—switched seamlessly to MW Instant Engine.');
+        reportData = runHeuristicAdAudit({
+          platformKey: state.platform,
+          platformName: PLATFORM_RULES[state.platform].name,
+          objective,
+          cta,
+          audience,
+          headline,
+          primaryCopy,
+          hasImage: Boolean(state.imageBase64)
+        });
+      }
+
+      clearInterval(stepTimer);
+      progressBar.style.width = '100%';
+
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        reportData.engineUsed = engineUsed;
+        reportData.metaInput = { platform: PLATFORM_RULES[state.platform].name, objective, cta, audience, headline, primaryCopy };
+        state.currentReport = reportData;
+        state.activePrescriptionIdx = 0;
+        renderDiagnosticReport(reportData);
+      }, 300);
+    }
+
+    // Live Google Gemini 2.5 Flash API Integration
+    async function callGeminiAdAudit(apiKey, payload) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      const prompt = `You are MW Ad Doctor, an elite direct-response performance marketing strategist at MW Agency. Audit the following ad strictly and return ONLY valid JSON matching the exact schema below.
+
+Platform: ${payload.platform}
+Objective: ${payload.objective}
+Target Audience & Offer: ${payload.audience}
+Headline: "${payload.headline}"
+Primary Copy: "${payload.primaryCopy}"
+CTA Button: "${payload.cta}"
+Creative Image Attached: ${payload.imageBase64 ? 'Yes (analyze visual scroll-stop contrast, text overlay clutter, and copy-visual congruence)' : 'No'}
+
+Return ONLY a JSON object with this exact structure:
+{
+  "overallScore": number (0-100),
+  "verdictBadge": "CRITICAL BLEEDING" | "NEEDS SURGERY" | "OPTIMIZATION READY" | "HIGH-CONVERTING READY",
+  "verdictHeadline": "1-sentence punchy clinical summary",
+  "subScores": {
+    "hook": number (0-100),
+    "offer": number (0-100),
+    "platformFit": number (0-100),
+    "cta": number (0-100)
+  },
+  "diagnoses": [
+    { "severity": "critical" | "warning", "title": "Short issue title", "detail": "Specific surgical explanation referencing their exact words/creative" }
+  ],
+  "rewrites": [
+    {
+      "angle": "Pain-Agitation-Solution",
+      "badge": "Direct Response Closer",
+      "headline": "High-converting headline under 40 chars",
+      "primaryText": "Full persuasive ad copy formatted with line breaks and bullet points",
+      "suggestedCta": "Best CTA",
+      "whyItWorks": "Brief psychological breakdown"
+    },
+    {
+      "angle": "Curiosity & Pattern Interrupt",
+      "badge": "Scroll-Stopper",
+      "headline": "Pattern-interrupt headline",
+      "primaryText": "Full curiosity-driven ad copy",
+      "suggestedCta": "Best CTA",
+      "whyItWorks": "Brief psychological breakdown"
+    },
+    {
+      "angle": "Social Proof & Scarcity",
+      "badge": "Urgency Accelerator",
+      "headline": "Urgency/proof headline",
+      "primaryText": "Full social-proof + scarcity ad copy",
+      "suggestedCta": "Best CTA",
+      "whyItWorks": "Brief psychological breakdown"
+    }
+  ],
+  "abTests": [
+    { "title": "Test variable", "action": "Concrete A/B test instruction" }
+  ]
+}`;
+
+      const parts = [{ text: prompt }];
+      if (payload.imageBase64 && payload.imageMimeType) {
+        parts.push({
+          inlineData: {
+            mimeType: payload.imageMimeType,
+            data: payload.imageBase64
+          }
+        });
+      }
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.7
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) throw new Error('Empty Gemini response');
+      return JSON.parse(rawText);
+    }
+
+    // Smart Built-In Heuristic & Dynamic Copy Surgery Engine
+    function runHeuristicAdAudit({ platformKey, platformName, objective, cta, audience, headline, primaryCopy, hasImage }) {
+      const fullText = `${headline} ${primaryCopy}`.toLowerCase();
+      const limit = PLATFORM_RULES[platformKey].headlineLimit;
+
+      // Dynamic Scoring Signals
+      const hasNumbers = /\d+%|\d+x|\$\d+|rs\.?\s*\d+|aed\s*\d+|\d+\s*(days|hours|mins|customers|reviews)/i.test(fullText);
+      const hasUrgency = /(today|now|limited|only|hurry|ends|tonight|last chance|fast|instant|free)/i.test(fullText);
+      const hasPainOrBenefit = /(stop|tired|struggling|without|save|boost|double|secret|proven|guaranteed|fix|glow|results|hair|skin|leads|sales)/i.test(fullText);
+      const hasGenericFluff = /(we are excited|introduce|many customers|visit our website|best quality|welcome to)/i.test(fullText);
+      const hasQuestion = headline.includes('?');
+
+      let hookScore = 44 + (hasQuestion ? 16 : 0) + (hasPainOrBenefit ? 14 : 0) + (headline.length > 8 && headline.length <= limit ? 12 : -8) - (hasGenericFluff ? 14 : 0);
+      let offerScore = 42 + (hasNumbers ? 22 : 0) + (hasUrgency ? 15 : 0) + (audience.length > 15 ? 10 : 0);
+      let platformScore = 52 + (headline.length <= limit ? 18 : -12) + (primaryCopy.length >= 60 && primaryCopy.length <= 450 ? 15 : -6) + (hasImage ? 10 : 0);
+      let ctaScore = 48 + (objective.includes('Conversions') && (cta === 'Shop Now' || cta === 'Get Offer') ? 28 : -10) + (hasUrgency ? 12 : 0);
+
+      hookScore = Math.max(22, Math.min(94, hookScore));
+      offerScore = Math.max(25, Math.min(95, offerScore));
+      platformScore = Math.max(30, Math.min(95, platformScore));
+      ctaScore = Math.max(28, Math.min(94, ctaScore));
+
+      const overallScore = Math.round((hookScore * 0.35) + (offerScore * 0.30) + (platformScore * 0.20) + (ctaScore * 0.15));
+
+      let verdictBadge = 'NEEDS SURGERY';
+      let verdictHeadline = 'Conversion leaks detected: passive framing is inflating your CPA.';
+      if (overallScore < 48) {
+        verdictBadge = 'CRITICAL BLEEDING';
+        verdictHeadline = 'High scroll-past alert: buyers have no urgent reason to stop or click.';
+      } else if (overallScore >= 76) {
+        verdictBadge = 'HIGH-CONVERTING READY';
+        verdictHeadline = 'Strong direct-response bones—apply MW rewrites to scale ROAS.';
+      }
+
+      // Build Custom Diagnoses
+      const diagnoses = [];
+      if (hasGenericFluff || hookScore < 65) {
+        diagnoses.push({
+          severity: 'critical',
+          title: 'Company-Centric "We/Our" Opening Kills Scroll-Stop Rate',
+          detail: `Your headline "${headline.slice(0, 52)}${headline.length > 52 ? '...' : ''}" talks about the product instead of calling out the buyer's immediate pain or desired outcome in the first 2 seconds.`
+        });
+      }
+      if (headline.length > limit) {
+        diagnoses.push({
+          severity: 'warning',
+          title: `${platformName} Headline Truncation (${headline.length}/${limit} chars)`,
+          detail: `Mobile feeds will cut off the end of your headline. Keep high-impact value words inside the first ${limit} characters.`
+        });
+      }
+      if (!hasNumbers) {
+        diagnoses.push({
+          severity: 'critical',
+          title: 'Missing Quantifiable Proof or Concrete Offer Anchor',
+          detail: 'Ads without specific numbers (e.g., % discount, timeframe like "in 14 days", or social proof count) suffer up to 38% lower CTR.'
+        });
+      }
+      if (objective.includes('Conversions') && cta === 'Learn More') {
+        diagnoses.push({
+          severity: 'warning',
+          title: 'Passive CTA Mismatch ("Learn More" on a Sales Campaign)',
+          detail: 'Using "Learn More" attracts window-shoppers. Switch to "Shop Now" or "Get Offer" to train the ad algorithm for high-intent buyers.'
+        });
+      }
+      if (hasImage) {
+        diagnoses.push({
+          severity: 'warning',
+          title: 'Creative Visual Contrast & 3-Word Hook Check',
+          detail: 'Ensure your uploaded image uses a high-contrast focal point with ≤20% text overlay and mirrors the exact promise in Line 1 of your copy.'
+        });
+      } else {
+        diagnoses.push({
+          severity: 'warning',
+          title: 'No Visual Creative Attached for Multimodal Audit',
+          detail: '70%+ of ad performance comes from the visual creative. Pair our rewritten copy below with a raw UGC or before/after split visual.'
+        });
+      }
+
+      // Extract Topic & Offer Context for Tailored Rewrites
+      const cleanAudience = audience || 'smart buyers';
+      const coreTopic = headline
+        .replace(/buy our|best|today|now available|introducing|new|for/gi, '')
+        .trim() || 'this proven solution';
+      const shortTopic = coreTopic.split(' ').slice(0, 5).join(' ');
+
+      const rewrites = [
+        {
+          angle: 'Pain-Agitation-Solution',
+          badge: 'Direct Response Closer',
+          headline: `Stop Wasting Money On Weak Fixes ⚡`,
+          primaryText: `Still frustrated trying to get real results with ${shortTopic}?\n\nMost options overpromise and leave you disappointed—wasting your time and money.\n\nThat’s why ${cleanAudience} are switching to our proven formula:\n✅ Fast, visible results without complicated routines\n✅ Backed by real customer transformations\n✅ Special Offer: ${audience}\n\nTap "${objective.includes('Lead') ? 'Sign Up' : 'Shop Now'}" before this batch sells out.`,
+          suggestedCta: objective.includes('Lead') ? 'Sign Up' : 'Shop Now',
+          whyItWorks: 'Calls out the buyer’s frustration immediately, invalidates failed alternatives, and stacks bulleted benefits before the CTA.'
+        },
+        {
+          angle: 'Curiosity & Pattern Interrupt',
+          badge: 'Scroll-Stopper',
+          headline: `Why Everyone Is Switching To This 👀`,
+          primaryText: `Nobody talks about why traditional ${shortTopic} fails 80% of the time...\n\nWhen we fixed this ONE missing step, everything changed for ${cleanAudience}.\n\nHere’s what happens when you try it today:\n→ Noticeable difference from week one\n→ Zero guesswork, 100% satisfaction focus\n→ Exclusive deal active right now (${audience})\n\nClick below to claim yours while stock lasts.`,
+          suggestedCta: 'Get Offer',
+          whyItWorks: 'Opens an information gap ("ONE missing step") that forces thumb-scrollers to pause and read through to the offer.'
+        },
+        {
+          angle: 'Social Proof & Scarcity',
+          badge: 'Urgency Accelerator',
+          headline: `4.9★ Rated • Limited Stock Left 🔥`,
+          primaryText: `"I wish I found this 6 months ago!" — Verified Buyer ⭐⭐⭐⭐⭐\n\nOver 2,400+ happy customers already trust us for ${shortTopic}.\n\nBecause of high demand, only limited units remain at our special promo rate (${audience}).\n\n⚡ Fast dispatch & hassle-free ordering\n⚡ 100% authentic quality guaranteed\n\nLock in your discount now before prices reset tonight!`,
+          suggestedCta: objective.includes('Book') ? 'Book Now' : 'Shop Now',
+          whyItWorks: 'Leads with immediate third-party validation (4.9 stars + buyer quote) and closes with legitimate stock/price urgency.'
+        }
+      ];
+
+      const abTests = [
+        {
+          title: 'Creative Format Split Test',
+          action: 'Test a raw iPhone UGC testimonial video against a clean high-contrast product benefit graphic.'
+        },
+        {
+          title: 'First-Line Hook Battle',
+          action: 'Run Angle 1 (Pain-Agitation) vs. Angle 3 (4.9★ Social Proof) in the same ad set for 72 hours.'
+        },
+        {
+          title: 'Offer Framing Test',
+          action: 'Compare "% OFF" vs. "Free Bonus / Free COD" in the headline overlay to see which lowers CPA.'
+        },
+        {
+          title: 'Landing Page Congruence',
+          action: 'Match your landing page H1 headline word-for-word with the winning ad headline to boost CVR.'
+        }
+      ];
+
+      return {
+        overallScore,
+        verdictBadge,
+        verdictHeadline,
+        subScores: {
+          hook: hookScore,
+          offer: offerScore,
+          platformFit: platformScore,
+          cta: ctaScore
+        },
+        diagnoses,
+        rewrites,
+        abTests
+      };
+    }
+
+    // Render Diagnostic Report into Right Panel
+    function renderDiagnosticReport(report) {
+      document.getElementById('emptyResultState').classList.add('hidden');
+      const resultsEl = document.getElementById('diagnosticResultsState');
+      resultsEl.classList.remove('hidden');
+
+      // Animate Score Ring & Number
+      const score = report.overallScore;
+      const circle = document.getElementById('scoreRingCircle');
+      const circumference = 314.16;
+      const offset = circumference - (score / 100) * circumference;
+
+      let ringColor = '#D4AF37';
+      let badgeClasses = 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      if (score < 48) {
+        ringColor = '#EF4444';
+        badgeClasses = 'bg-red-500/15 text-red-400 border-red-500/30';
+      } else if (score >= 76) {
+        ringColor = '#10B981';
+        badgeClasses = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      }
+
+      circle.style.stroke = ringColor;
+      setTimeout(() => {
+        circle.style.strokeDashoffset = offset;
+      }, 60);
+
+      // Count-up animation
+      const scoreNumEl = document.getElementById('overallScoreNumber');
+      let currentNum = 0;
+      const step = Math.max(1, Math.ceil(score / 25));
+      const counterInterval = setInterval(() => {
+        currentNum += step;
+        if (currentNum >= score) {
+          currentNum = score;
+          clearInterval(counterInterval);
+        }
+        scoreNumEl.textContent = currentNum;
+      }, 25);
+
+      const badgeEl = document.getElementById('verdictBadge');
+      badgeEl.textContent = report.verdictBadge;
+      badgeEl.className = `px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider border ${badgeClasses}`;
+
+      document.getElementById('verdictHeadline').textContent = report.verdictHeadline;
+      document.getElementById('auditSourceBadge').innerHTML = `<i data-lucide="cpu" class="w-3.5 h-3.5 text-[#D4AF37]"></i><span>${report.engineUsed}</span>`;
+
+      // Update Sub-Bars
+      const subs = [
+        { id: 'Hook', val: report.subScores.hook },
+        { id: 'Offer', val: report.subScores.offer },
+        { id: 'Platform', val: report.subScores.platformFit },
+        { id: 'Cta', val: report.subScores.cta }
+      ];
+      subs.forEach(s => {
+        document.getElementById(`sub${s.id}Score`).textContent = `${s.val}/100`;
+        document.getElementById(`sub${s.id}Bar`).style.width = `${s.val}%`;
+      });
+
+      // Render Clinical Diagnoses
+      const diagList = document.getElementById('diagnosisList');
+      diagList.innerHTML = report.diagnoses.map(item => {
+        const isCrit = item.severity === 'critical';
+        const pillBg = isCrit ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400';
+        const label = isCrit ? 'CRITICAL LEAK' : 'FRICTION';
+        return `
+          <li class="bg-[#0A0A0A] border border-[#222222] rounded-xl p-3.5 flex items-start gap-3">
+            <span class="mt-0.5 px-2 py-0.5 rounded text-[10px] font-extrabold tracking-wider border shrink-0 ${pillBg}">${label}</span>
+            <div>
+              <h4 class="text-xs sm:text-sm font-bold text-white mb-0.5">${escapeHtml(item.title)}</h4>
+              <p class="text-xs text-neutral-400 leading-relaxed">${escapeHtml(item.detail)}</p>
+            </div>
+          </li>
+        `;
+      }).join('');
+
+      // Render Prescription Tab 0
+      selectPrescriptionTab(0);
+
+      // Render A/B Checklist
+      const abContainer = document.getElementById('abChecklistContainer');
+      abContainer.innerHTML = report.abTests.map(test => `
+        <div class="bg-[#0A0A0A] border border-[#222222] rounded-xl p-3.5 flex items-start gap-2.5">
+          <i data-lucide="check-square" class="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="text-xs font-bold text-white mb-1">${escapeHtml(test.title)}</h4>
+            <p class="text-[11px] text-neutral-400 leading-relaxed">${escapeHtml(test.action)}</p>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // Switch Active Prescription Rewrite Card
+    function selectPrescriptionTab(idx) {
+      if (!state.currentReport) return;
+      state.activePrescriptionIdx = idx;
+
+      [0, 1, 2].forEach(i => {
+        const tab = document.getElementById(`rx-tab-${i}`);
+        if (i === idx) {
+          tab.className = 'rx-tab py-2 px-2 rounded-lg text-xs font-bold transition bg-[#D4AF37] text-black shadow';
+        } else {
+          tab.className = 'rx-tab py-2 px-2 rounded-lg text-xs font-bold transition text-neutral-400 hover:text-white';
+        }
+      });
+
+      const rx = state.currentReport.rewrites[idx];
+      const container = document.getElementById('prescriptionCardContainer');
+
+      container.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-[#1E1E1E]">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#D4AF37]/15 text-[#D4AF37] border border-[#D4AF37]/30">${escapeHtml(rx.badge)}</span>
+            <span class="text-xs text-neutral-400">CTA: <strong class="text-white">${escapeHtml(rx.suggestedCta)}</strong></span>
+          </div>
+          <button type="button" onclick="copyRewriteToClipboard(${idx})" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181818] hover:bg-[#D4AF37] text-white hover:text-black border border-[#2E2E2E] hover:border-[#D4AF37] text-xs font-bold transition cursor-pointer">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copy Ad</span>
+          </button>
+        </div>
+
+        <div class="mb-3">
+          <span class="block text-[10px] uppercase tracking-wider text-neutral-500 font-semibold mb-1">High-Converting Headline</span>
+          <p class="font-display font-bold text-sm sm:text-base text-[#F3E5AB]">${escapeHtml(rx.headline)}</p>
+        </div>
+
+        <div class="mb-4">
+          <span class="block text-[10px] uppercase tracking-wider text-neutral-500 font-semibold mb-1">Primary Ad Copy</span>
+          <div class="bg-[#121212] border border-[#222222] rounded-lg p-3.5 text-xs sm:text-sm text-neutral-200 whitespace-pre-line leading-relaxed">${escapeHtml(rx.primaryText)}</div>
+        </div>
+
+        <div class="flex items-start gap-2 bg-[#14120D] border border-[#D4AF37]/20 rounded-lg p-3">
+          <i data-lucide="lightbulb" class="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5"></i>
+          <p class="text-[11px] text-neutral-300"><strong class="text-[#D4AF37]">Why It Converts:</strong> ${escapeHtml(rx.whyItWorks)}</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // One-Click Copy Using document.execCommand('copy')
+    function copyRewriteToClipboard(idx) {
+      const rx = state.currentReport.rewrites[idx];
+      const formatted = `HEADLINE:\n${rx.headline}\n\nPRIMARY COPY:\n${rx.primaryText}\n\nRECOMMENDED CTA: ${rx.suggestedCta}`;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = formatted;
+      tempArea.style.position = 'fixed';
+      tempArea.style.left = '-9999px';
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(`Copied "${rx.angle}" ad copy to clipboard!`);
+      } catch (err) {
+        showToast('Unable to copy text automatically.', 'error');
+      }
+      document.body.removeChild(tempArea);
+    }
+
+    // Export Complete Audit Report as Text File
+    function exportAuditReport() {
+      if (!state.currentReport) {
+        showToast('Run an Ad Surgery audit first before exporting.', 'error');
+        return;
+      }
+      const r = state.currentReport;
+      const lines = [
+        '====================================================',
+        'MW AD DOCTOR — CLINICAL AD DIAGNOSTIC REPORT',
+        'By MW Agency',
+        '====================================================',
+        `Platform: ${r.metaInput.platform}`,
+        `Objective: ${r.metaInput.objective}`,
+        `Target Audience & Offer: ${r.metaInput.audience}`,
+        `Overall Ad Health Score: ${r.overallScore}/100 (${r.verdictBadge})`,
+        `Sub-Scores -> Hook: ${r.subScores.hook} | Offer: ${r.subScores.offer} | Platform Fit: ${r.subScores.platformFit} | CTA: ${r.subScores.cta}`,
+        '',
+        '--- CLINICAL DIAGNOSIS ---',
+        ...r.diagnoses.map((d, i) => `${i + 1}. [${d.severity.toUpperCase()}] ${d.title}: ${d.detail}`),
+        '',
+        '--- THE PRESCRIPTION (3 HIGH-CONVERTING REWRITES) ---',
+        ...r.rewrites.map((rw, i) => [
+          `\nVARIANT ${i + 1}: ${rw.angle} (${rw.badge})`,
+          `Headline: ${rw.headline}`,
+          `CTA: ${rw.suggestedCta}`,
+          `Primary Copy:\n${rw.primaryText}`,
+          `Why It Works: ${rw.whyItWorks}`
+        ].join('\n')),
+        '',
+        '--- A/B TESTING PROTOCOL ---',
+        ...r.abTests.map((t, i) => `${i + 1}. ${t.title}: ${t.action}`)
+      ].join('\n');
+
+      const blob = new Blob([lines], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `MW-Ad-Doctor-Report-${r.overallScore}pts.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Audit report downloaded!');
+    }
+
+    // Basic HTML Sanitizer
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
